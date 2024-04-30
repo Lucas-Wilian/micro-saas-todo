@@ -29,5 +29,5 @@ export const createTodoController = async (req: Request, res: Response) => {
       ownerId: user.id,
     },
   });
-  return res.send(todo);
+  return res.status(201).send(todo);
 };
