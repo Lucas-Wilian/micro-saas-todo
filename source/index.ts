@@ -4,6 +4,7 @@ import {
   findOneUserController,
   listUserController,
 } from "./controllers/user.controller";
+import { createTodoController } from "./controllers/todo.controller";
 
 const app = express();
 app.use(express.json());
@@ -12,6 +13,7 @@ const port = 3000;
 app.get("/users", listUserController);
 app.post("/users", createUserController);
 app.get("/users/:userId", findOneUserController);
+app.post("/todos", createTodoController);
 
 app.listen(port, () => {
   console.log(`Servidor rodando na porta: ${port}`);
