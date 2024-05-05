@@ -14,6 +14,16 @@ export const createTodoController = async (req: Request, res: Response) => {
     where: {
       id: userId as string,
     },
+    select: {
+      id: true,
+      stripeSubscriptionId: true,
+      stripeSubscriptionStatus: true,
+      _count: {
+        select: {
+          todos: true,
+        },
+      },
+    },
   });
 
   if (!user) {
@@ -22,6 +32,18 @@ export const createTodoController = async (req: Request, res: Response) => {
     });
   }
 
+  const hasQuotaAvailable = user._count.todos <= 5;
+  const hasActiveSubscription = !!user.stripeSubscriptionId;
+
+  if (
+    !hasQuotaAvailable &&
+    !hasActiveSubscription &&
+    user.stripeSubscriptionStatus !== "active"
+  ) {
+    return res.status(403).send({
+      error: "Not quota available. Please upgrade your plan.",
+    });
+  }
   const { title } = req.body;
   const todo = await prisma.todo.create({
     data: {
