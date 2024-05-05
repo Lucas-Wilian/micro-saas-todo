@@ -1,14 +1,20 @@
 import type { Request, Response } from "express";
 import { prisma } from "../lib/prisma";
+import { createStripeCustomer } from "../lib/stripe";
 
-export const listUserController = async (req: Request, res: Response) => {
+export const listUsersController = async (
+  request: Request,
+  response: Response
+) => {
   const users = await prisma.user.findMany();
-
-  res.send(users);
+  response.send(users);
 };
 
-export const findOneUserController = async (req: Request, res: Response) => {
-  const { userId } = req.params;
+export const findOneUserController = async (
+  request: Request,
+  response: Response
+) => {
+  const { userId } = request.params;
 
   const user = await prisma.user.findUnique({
     where: {
@@ -17,19 +23,22 @@ export const findOneUserController = async (req: Request, res: Response) => {
   });
 
   if (!user) {
-    return res.status(404).send({
+    return response.status(404).send({
       error: "Not found",
     });
   }
 
-  res.send(user);
+  response.send(user);
 };
 
-export const createUserController = async (req: Request, res: Response) => {
-  const { name, email } = req.body;
+export const createUserController = async (
+  request: Request,
+  response: Response
+) => {
+  const { name, email } = request.body;
 
   if (!name || !email) {
-    return res.send({
+    return response.send({
       error: "Name or email is invalid",
     });
   }
@@ -44,17 +53,23 @@ export const createUserController = async (req: Request, res: Response) => {
   });
 
   if (userEmailAlreadyExists) {
-    return res.status(404).send({
+    return response.status(400).send({
       error: "Email already in use",
     });
   }
+
+  const stripeCustomer = await createStripeCustomer({
+    name,
+    email,
+  });
 
   const user = await prisma.user.create({
     data: {
       name,
       email,
+      stripeCustomerId: stripeCustomer.id,
     },
   });
 
-  res.send(user);
+  response.send(user);
 };
