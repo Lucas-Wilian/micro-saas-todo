@@ -122,7 +122,6 @@ export const handleProcessWebhookUpdatedSubscription = async (event: {
     },
   });
 
-  console.log("oi");
   if (!userExists) {
     throw new Error("user of stripeCustomerId not found");
   }
