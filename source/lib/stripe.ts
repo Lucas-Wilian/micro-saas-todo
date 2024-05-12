@@ -44,7 +44,7 @@ export const createCheckoutSession = async (
       cancel_url: `http://localhost:3000/cancel.html`,
       line_items: [
         {
-          price: config.stripe.proPriceID,
+          price: config.stripe.proPriceId,
           quantity: 1,
         },
       ],
@@ -107,6 +107,7 @@ export const handleProcessWebhookUpdatedSubscription = async (event: {
 
   const userExists = await prisma.user.findFirst({
     where: {
+      stripeCustomerId,
       OR: [
         {
           stripeSubscriptionId,
@@ -121,6 +122,7 @@ export const handleProcessWebhookUpdatedSubscription = async (event: {
     },
   });
 
+  console.log("oi");
   if (!userExists) {
     throw new Error("user of stripeCustomerId not found");
   }
